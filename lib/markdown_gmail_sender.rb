@@ -24,16 +24,11 @@ class MarkdownGmailSender
 
       s = File.read filepath
 
-      from = s[/from: ([\S]+)/,1]
-      to = s[/to: ([\S]+)/,1]
-      subject = s[/subject: ([^\n]+)/,1]
-      subject_line  = s.lines.detect{|x|  x =~ /subject: / }
-      body = s.lines[(s.lines.index(subject_line) + 1) .. -1].join.strip
+      /from: (?<from>[\S]+)/ =~ s; /to: (?<to>[\S]+)/ =~ s
+      /subject: (?<subject>[^\n]+)\n(?<body>.*)/m =~ s
 
       {
-        filepath: filepath, 
-        from: from, to: to, 
-        subject: subject, 
+        filepath: filepath, from: from, to: to, subject: subject, 
         body_txt: body, body_html: RDiscount.new(body).to_html
       }
 
@@ -45,17 +40,14 @@ class MarkdownGmailSender
 
     @messages.each.with_index do |x, i|
 
-      username, password = x[:from], @accounts[x[:from]]
-      gmail = Gmail.new(username, password)
+      gmail = Gmail.new(username=x[:from], password=@accounts[x[:from]])
 
       gmail.deliver do
 
         to x[:to]
         subject x[:subject]
 
-        text_part do
-          body x[:body_txt]
-        end
+        text_part { body x[:body_txt] }
 
         html_part do
           content_type 'text/html; charset=UTF-8'
