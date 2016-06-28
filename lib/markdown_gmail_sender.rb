@@ -20,16 +20,29 @@ class MarkdownGmailSender
 
     # scan the compose directory for email files to deliver
 
-    @messages = Dir.glob(File.join(compose_dirpath, '*.md')).map do |filepath|
+    @messages = Dir.glob(File.join(compose_dirpath, '*.md')).map do |mdfile|
 
-      s = File.read filepath
+      s = File.read mdfile
+      
+      regex = %r{
 
-      /from: (?<from>[\S]+)/ =~ s; /to: (?<to>[\S]+)/ =~ s
-      /subject: (?<subject>[^\n]+)\n(?<body>.*)/m =~ s
+        (?<email>(?:.*<)?\w+(?:\.\w+)?@\S+>?){0}
+        (?<filepath>\s*[\w\/\.]+\s+){0}
+
+        from:\s(?<from>\g<email>)\s+
+        to:\s(?<to>\g<email>)\s+
+        (?:attachments?:\s+(?<attachments>\g<filepath>*))?
+        subject:\s+(?<subject> [^\n]+)\n
+        (?<body> .*)
+
+      }xm =~ s      
+      
+      files = attachments.nil? ? [] : attachments.split.map(&:strip)
 
       {
-        filepath: filepath, from: from, to: to, subject: subject, 
-        body_txt: body, body_html: RDiscount.new(body).to_html
+        filepath: mdfile, from: from, to: to, attachments: files,
+        subject: subject, body_txt: body, 
+        body_html: RDiscount.new(body).to_html
       }
 
     end
@@ -55,6 +68,10 @@ class MarkdownGmailSender
         html_part do
           content_type 'text/html; charset=UTF-8'
           body x[:body_html]
+        end
+        
+        x[:attachments].each do |attachment|
+          add_file attachment.strip
         end
 
       end
