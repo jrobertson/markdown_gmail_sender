@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name = 'markdown_gmail_sender'
-  s.version = '0.1.5'
+  s.version = '0.1.6'
   s.summary = 'Scans a *compose* folder (file directory) for messages (files in markdown format) to send using the gmail gem.'
   s.authors = ['James Robertson']
   s.files = Dir['lib/markdown_gmail_sender.rb']

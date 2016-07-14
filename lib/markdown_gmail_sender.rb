@@ -54,7 +54,8 @@ class MarkdownGmailSender
 
     @messages.each.with_index do |x, i|
 
-      from = x[:from][/(?:.*<)?(\w+(?:\.\w+)?@\S+)>/,1]
+      from = x[:from][/(?:.*<)?(\w+(?:\.\w+)?@\S+[^>])/,1]
+
       username, password = from, @accounts[from]
 
       gmail = Gmail.new(username, password)
