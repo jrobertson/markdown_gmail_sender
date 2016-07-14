@@ -53,7 +53,10 @@ class MarkdownGmailSender
 
     @messages.each.with_index do |x, i|
 
-      gmail = Gmail.new(username=x[:from], password=@accounts[x[:from]])
+      from = x[:from][/(?:.*<)?(\w+(?:\.\w+)?@\S+)>/,1]
+      username, password = from, @accounts[from]
+
+      gmail = Gmail.new(username, password)
       
       if not gmail.signed_in? then
         raise "markdown_gmail_sender: Gmail user #{username} not signed in"
