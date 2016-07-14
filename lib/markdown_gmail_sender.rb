@@ -27,7 +27,7 @@ class MarkdownGmailSender
       regex = %r{
 
         (?<email>(?:.*<)?\w+(?:\.\w+)?@\S+>?){0}
-        (?<filepath>\s*[\w\/\.]+\s+){0}
+        (?<filepath>\s*[\w\/\.\-]+\s+){0}
 
         from:\s(?<from>\g<email>)\s+
         to:\s(?<to>\g<email>)\s+
@@ -38,6 +38,7 @@ class MarkdownGmailSender
       }xm =~ s      
       
       files = attachments.nil? ? [] : attachments.split.map(&:strip)
+
 
       {
         filepath: mdfile, from: from, to: to, attachments: files,
