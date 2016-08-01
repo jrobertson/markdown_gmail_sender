@@ -26,7 +26,7 @@ class MarkdownGmailSender
       
       regex = %r{
 
-        (?<email>(?:.*<)?\w+(?:\.\w+)?@\S+>?){0}
+        (?<email>(?:.*<)?[^@]+@\S+>?){0}
         (?<filepath>\s*[\w\/\.\-]+\s+){0}
 
         from:\s(?<from>\g<email>)\s+
