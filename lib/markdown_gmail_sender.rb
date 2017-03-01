@@ -23,6 +23,7 @@ class MarkdownGmailSender
     @messages = Dir.glob(File.join(compose_dirpath, '*.md')).map do |mdfile|
 
       s = File.read mdfile
+
       
       regex = %r{
 
@@ -35,15 +36,16 @@ class MarkdownGmailSender
         subject:\s+(?<subject> [^\n]+)\n
         (?<body> .*)
 
-      }xm =~ s      
+      }xm
       
-      files = attachments.nil? ? [] : attachments.split.map(&:strip)
-
+      r = regex.match(s)
+      
+      files = r[:attachments].nil? ? [] : r[:attachments].split.map(&:strip)
 
       {
-        filepath: mdfile, from: from, to: to, attachments: files,
-        subject: subject, body_txt: body, 
-        body_html: RDiscount.new(body).to_html
+        filepath: mdfile, from: r[:from], to: r[:to], 
+        attachments: files, subject: r[:subject], body_txt: r[:body], 
+        body_html: RDiscount.new(r[:body]).to_html
       }
 
     end
