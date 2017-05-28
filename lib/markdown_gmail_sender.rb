@@ -3,7 +3,8 @@
 # file: markdown_gmail_sender.rb
 
 require 'gmail'
-require 'rdiscount'
+require 'martile'
+require 'kramdown'
 require 'fileutils'
 
 
@@ -45,7 +46,7 @@ class MarkdownGmailSender
       {
         filepath: mdfile, from: r[:from], to: r[:to], 
         attachments: files, subject: r[:subject], body_txt: r[:body], 
-        body_html: RDiscount.new(r[:body]).to_html
+        body_html: Kramdown::Document.new(Martile.new(r[:body]).to_html).to_html
       }
 
     end
@@ -56,8 +57,11 @@ class MarkdownGmailSender
 
     @messages.each.with_index do |x, i|
 
-      from = x[:from][/(?:.*<)?(\w+(?:\.\w+)?@\S+[^>])/,1]
-
+      from = x[:from][/(?:.*<)?(\w+(?:\.\w+)?@[^\.]+\.\S+[^>])/,1]
+      
+      if from.nil? then
+        raise 'MarkdownGmailSender::Error invalid from address: ' + x[:from]
+      end
       username, password = from, @accounts[from]
 
       gmail = Gmail.new(username, password)
